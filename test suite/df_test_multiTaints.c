@@ -60,8 +60,7 @@ void sys_call( MSG *uptr, int n, int* up){
 		copy_from_user(buf, uptr, msglen); // real DF use
 	}
 
-		get_user(msglen, &(uptr->len)); // disturbance fetch, do not in taint controlled branch
-		copy_from_user(buf, uptr, msglen); //disturbance use
+
 
 	//...
 }

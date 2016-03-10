@@ -12,9 +12,10 @@ typedef uint8_t BYTE;
 typedef uint32_t* PDWORD;
 typedef uint8_t* PBYTE;
 
+#define __get_user(x, y) ( get_user(x, y))
 
 //..
-int memcmp(const void *ptr1, const void *ptr2, uint64_t num) {
+int test_memcmp(const void *ptr1, const void *ptr2, uint64_t num) {
 	DWORD D1 = INI();
 	DWORD D2 = INI();
 	while(num >= sizeof(DWORD)){

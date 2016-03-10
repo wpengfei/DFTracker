@@ -19,14 +19,7 @@ typedef struct MSG_s{
 }MSG;
 /* fake function, just invoke the callback function to add taints*/
 signed long copy_from_user(void * to, const void *from, unsigned long n){
-/*
-	unsigned long temp = 0;
-	for(unsigned long i = 0; i < n; i++){
-		*((uint8_t*)to + temp) = *((uint8_t*)from + temp);
-		temp = temp + 8;
-	}
 
-*/
 	return 0;
 }
 unsigned int get_user(int x, int* ptr){
@@ -34,27 +27,32 @@ unsigned int get_user(int x, int* ptr){
 	return 0;
 }
 
-
 void sys_call( MSG *uptr, int n){
 
 	char* buf = malloc(BUF_SIZE);
 
 	unsigned int msglen = INIT_VALUE();
 	unsigned int err = get_user(msglen, &(uptr->len)); // first read from user, t1
+
 	if(err)
 		return;
+	if(msglen < BUF_SIZE){
+			//..
+			//..
+			get_user(msglen, &(uptr->len)); // second read from user, t2
+			//..
 
-	if(msglen + 4 < BUF_SIZE){
-		//..
-		//..
-		get_user(msglen, &(uptr->len)); // second read from user, t2
-		//..
-
-		copy_from_user(buf, uptr->text, msglen);// real use
+			copy_from_user(buf, uptr->text, msglen);// real use
+	}
+	else{
+		return;
 	}
 
 	//...
+
+	return;
 }
+
 
 int kernel_func(MSG *uptr, int n, int* up){
 
@@ -62,28 +60,30 @@ int kernel_func(MSG *uptr, int n, int* up){
 	unsigned int count = INIT_VALUE();
 	unsigned int msglen = INIT_VALUE();
 
+	get_user(count, up); // disturbance fetch, value from other address
 
 	get_user(msglen, &(uptr->len)); // first read from user, t1
 
-	get_user(count, up); // disturbance fetch, value from other address
 
 	//..
 
-	char* buf = malloc(msglen); //
+	char* buf = (char*)malloc(msglen); //
 	if( buf != NULL){
 		//..
-
 		get_user(count, up); // disturbance fetch, value from other address
 		copy_from_user(buf, uptr, count); // disturbance use
 
 		get_user(msglen, &(uptr->len)); // second read from user, t2
 		copy_from_user(buf, uptr, msglen); // real DF use
+
+		return 1;
 	}
-
-
-
-	//...
-	return 0;
+	else{
+		return 0;
+	}
 }
+
+
+
 
 
